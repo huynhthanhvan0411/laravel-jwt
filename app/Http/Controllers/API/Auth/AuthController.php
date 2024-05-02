@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Log;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -62,5 +63,17 @@ class AuthController extends Controller
             DB::rollBack();
             Log::error($e->getMessage());
             return response()->json(['success' => false,'messege'=> $e->getMessage()], 401);}
+    }
+    public function logout(){
+        auth('api')->logout();
+        return response()->json(['success' => true,'message' => 'User successfully signed out.'], 200);
+    }
+    protected function createNewToken($token){
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => JWTAuth::factory()->getTTL() * 60,
+            'user' => auth('api')->user()
+        ]);
     }
 }
